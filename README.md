@@ -8,7 +8,8 @@ An image built from the `Dockerfile` in this repository is available on Docker H
 
 A few environment variables are available for configuration:
 
-* `DELAY`: seconds between selecting and deleting a pod. Defaults to `30`.
+* `MIN_DELAY_IN_SECS`: minimum seconds between selecting and deleting a pod. Defaults to `30`.
+* `MAX_DELAY_IN_SECS`: maximum seconds between selecting and deleting a pod. Defaults to `90`.
 * `NAMESPACE`: the namespace to select a pod from. Defaults to `default`.
 
 Example Kubernetes config is included at [`config/kubernetes/production/deployment.yaml`](./config/kubernetes/production/deployment.yaml)
@@ -21,17 +22,11 @@ deployment "kubernetes-pod-chaos-monkey" created
 $ kubectl get pods | grep chaos
 kubernetes-pod-chaos-monkey-3294408070-6w6oh   1/1       Running       0          19s
 $ kubectl logs kubernetes-pod-chaos-monkey-3294408070-6w6oh
-+ : 30
-+ : default
-+ true
-+ xargs -t --no-run-if-empty kubectl --namespace default delete pod
-+ head -n 1
-+ shuf
-+ tr ' ' '\n'
-+ kubectl --namespace default -o 'jsonpath={.items[*].metadata.name}' get pods
-kubectl --namespace default delete pod dd-agent-3hw6w
-pod "dd-agent-3hw6w" deleted
-+ sleep 30
+MIN_DELAY_IN_SECS=300
+MAX_DELAY_IN_SECS=600
+NAMESPACE=test
+[2022/08/03 10:25:11] pod "foo-7ddc6dd94f-4xx7q" deleted
+[2022/08/03 10:30:38] pod "bar-55775f8fc8-fwqnp" deleted
 ```
 
 ## License

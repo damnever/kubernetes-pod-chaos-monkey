@@ -1,4 +1,29 @@
-apiVersion: extensions/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  # "namespace" omitted since ClusterRoles are not namespaced
+  name: kubernetes-pod-chaos-monkey
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+# This cluster role binding allows anyone in the "manager" group to read secrets in any namespace.
+kind: ClusterRoleBinding
+metadata:
+  name: kubernetes-pod-chaos-monkey
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: kubernetes-pod-chaos-monkey
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kubernetes-pod-chaos-monkey
@@ -14,5 +39,12 @@ spec:
     spec:
       containers:
       - name: kubernetes-pod-chaos-monkey
-        image: jnewland/kubernetes-pod-chaos-monkey
+        image: TODO
         imagePullPolicy: Always
+        env:
+          - name: MIN_DELAY_IN_SECS
+            value: "180"
+          - name: MAX_DELAY_IN_SECS
+            value: "600"
+          - name: NAMESPACE
+            value: "ANOTHER-NAMESPACE"
